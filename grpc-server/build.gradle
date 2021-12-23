@@ -1,0 +1,65 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.8'
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '2.6.2'
+    id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+    id 'java'
+}
+
+apply plugin: "com.google.protobuf"
+
+group = 'siru'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // gRPC
+    compileOnly "io.grpc:grpc-netty-shaded:1.43.1"
+    compileOnly "io.grpc:grpc-protobuf:1.43.1"
+    compileOnly "io.grpc:grpc-stub:1.43.1"
+    implementation "com.google.protobuf:protobuf-java-util:3.19.1"
+    compileOnly "com.google.protobuf:protobuf-java:3.19.1"
+
+    // spring
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+    runtimeOnly 'io.perfmark:perfmark-api:0.23.0'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs += [
+                    '../grpc-common/build/generated/source/proto/main/grpc',
+                    '../grpc-common/build/generated/source/proto/main/java'
+            ]
+        }
+    }
+}
