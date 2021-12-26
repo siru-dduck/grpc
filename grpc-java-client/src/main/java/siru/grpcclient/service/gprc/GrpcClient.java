@@ -23,7 +23,7 @@ public class GrpcClient {
     public void sampleCall() {
         final SampleRequest sampleRequest = SampleRequest.newBuilder()
                 .setUserId("U1001")
-                .setMessage("grpc request")
+                .setMessage("grpc request from java")
                 .build();
 
         asyncStub.sampleCall(sampleRequest, new StreamObserver<SampleResponse>() {
