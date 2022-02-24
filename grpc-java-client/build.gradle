@@ -31,11 +31,12 @@ repositories {
 
 dependencies {
     // gRPC
-    compileOnly "io.grpc:grpc-netty-shaded:1.43.1"
-    compileOnly "io.grpc:grpc-protobuf:1.43.1"
-    compileOnly "io.grpc:grpc-stub:1.43.1"
+//    compileOnly "io.grpc:grpc-netty-shaded:1.43.1"
+//    compileOnly "io.grpc:grpc-protobuf:1.43.1"
+//    compileOnly "io.grpc:grpc-stub:1.43.1"
     implementation "com.google.protobuf:protobuf-java-util:3.19.1"
     compileOnly "com.google.protobuf:protobuf-java:3.19.1"
+    implementation 'net.devh:grpc-spring-boot-starter:2.13.0.RELEASE'
 
     // spring
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
@@ -44,6 +45,9 @@ dependencies {
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.projectreactor:reactor-test'

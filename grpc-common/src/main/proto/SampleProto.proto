@@ -17,4 +17,5 @@ message SampleResponse {
 
 service SampleService {
   rpc SampleCall (SampleRequest) returns (SampleResponse) {}
+  rpc ClientStreamingCall (stream SampleRequest) returns (SampleResponse) {}
 }

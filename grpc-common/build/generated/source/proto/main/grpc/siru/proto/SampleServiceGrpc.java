@@ -46,6 +46,37 @@ public final class SampleServiceGrpc {
     return getSampleCallMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<siru.proto.SampleRequest,
+      siru.proto.SampleResponse> getClientStreamingCallMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ClientStreamingCall",
+      requestType = siru.proto.SampleRequest.class,
+      responseType = siru.proto.SampleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+  public static io.grpc.MethodDescriptor<siru.proto.SampleRequest,
+      siru.proto.SampleResponse> getClientStreamingCallMethod() {
+    io.grpc.MethodDescriptor<siru.proto.SampleRequest, siru.proto.SampleResponse> getClientStreamingCallMethod;
+    if ((getClientStreamingCallMethod = SampleServiceGrpc.getClientStreamingCallMethod) == null) {
+      synchronized (SampleServiceGrpc.class) {
+        if ((getClientStreamingCallMethod = SampleServiceGrpc.getClientStreamingCallMethod) == null) {
+          SampleServiceGrpc.getClientStreamingCallMethod = getClientStreamingCallMethod =
+              io.grpc.MethodDescriptor.<siru.proto.SampleRequest, siru.proto.SampleResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ClientStreamingCall"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  siru.proto.SampleRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  siru.proto.SampleResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new SampleServiceMethodDescriptorSupplier("ClientStreamingCall"))
+              .build();
+        }
+      }
+    }
+    return getClientStreamingCallMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -101,6 +132,13 @@ public final class SampleServiceGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSampleCallMethod(), responseObserver);
     }
 
+    /**
+     */
+    public io.grpc.stub.StreamObserver<siru.proto.SampleRequest> clientStreamingCall(
+        io.grpc.stub.StreamObserver<siru.proto.SampleResponse> responseObserver) {
+      return io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall(getClientStreamingCallMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -110,6 +148,13 @@ public final class SampleServiceGrpc {
                 siru.proto.SampleRequest,
                 siru.proto.SampleResponse>(
                   this, METHODID_SAMPLE_CALL)))
+          .addMethod(
+            getClientStreamingCallMethod(),
+            io.grpc.stub.ServerCalls.asyncClientStreamingCall(
+              new MethodHandlers<
+                siru.proto.SampleRequest,
+                siru.proto.SampleResponse>(
+                  this, METHODID_CLIENT_STREAMING_CALL)))
           .build();
     }
   }
@@ -134,6 +179,14 @@ public final class SampleServiceGrpc {
         io.grpc.stub.StreamObserver<siru.proto.SampleResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getSampleCallMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     */
+    public io.grpc.stub.StreamObserver<siru.proto.SampleRequest> clientStreamingCall(
+        io.grpc.stub.StreamObserver<siru.proto.SampleResponse> responseObserver) {
+      return io.grpc.stub.ClientCalls.asyncClientStreamingCall(
+          getChannel().newCall(getClientStreamingCallMethod(), getCallOptions()), responseObserver);
     }
   }
 
@@ -183,6 +236,7 @@ public final class SampleServiceGrpc {
   }
 
   private static final int METHODID_SAMPLE_CALL = 0;
+  private static final int METHODID_CLIENT_STREAMING_CALL = 1;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -215,6 +269,9 @@ public final class SampleServiceGrpc {
     public io.grpc.stub.StreamObserver<Req> invoke(
         io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
+        case METHODID_CLIENT_STREAMING_CALL:
+          return (io.grpc.stub.StreamObserver<Req>) serviceImpl.clientStreamingCall(
+              (io.grpc.stub.StreamObserver<siru.proto.SampleResponse>) responseObserver);
         default:
           throw new AssertionError();
       }
@@ -267,6 +324,7 @@ public final class SampleServiceGrpc {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new SampleServiceFileDescriptorSupplier())
               .addMethod(getSampleCallMethod())
+              .addMethod(getClientStreamingCallMethod())
               .build();
         }
       }

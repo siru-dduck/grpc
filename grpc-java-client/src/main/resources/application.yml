@@ -1,2 +1,7 @@
 server:
   port: 8081
+
+grpc:
+  client:
+    sampleService:
+      address: static://localhost:4000

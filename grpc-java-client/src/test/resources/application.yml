@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+grpc:
+  client:
+    sampleService:
+      address: in-process:test
+  server:
+    in-process-name: test
+    port: -1 # Disable External Port

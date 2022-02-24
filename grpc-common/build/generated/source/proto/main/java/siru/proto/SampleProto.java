@@ -35,11 +35,13 @@ public final class SampleProto {
     java.lang.String[] descriptorData = {
       "\n\021SampleProto.proto\022\013grpc.sample\"0\n\rSamp" +
       "leRequest\022\016\n\006userId\030\001 \001(\t\022\017\n\007message\030\002 \001" +
-      "(\t\"!\n\016SampleResponse\022\017\n\007message\030\001 \001(\t2X\n" +
-      "\rSampleService\022G\n\nSampleCall\022\032.grpc.samp" +
-      "le.SampleRequest\032\033.grpc.sample.SampleRes" +
-      "ponse\"\000B\033\n\nsiru.protoB\013SampleProtoP\001b\006pr" +
-      "oto3"
+      "(\t\"!\n\016SampleResponse\022\017\n\007message\030\001 \001(\t2\254\001" +
+      "\n\rSampleService\022G\n\nSampleCall\022\032.grpc.sam" +
+      "ple.SampleRequest\032\033.grpc.sample.SampleRe" +
+      "sponse\"\000\022R\n\023ClientStreamingCall\022\032.grpc.s" +
+      "ample.SampleRequest\032\033.grpc.sample.Sample" +
+      "Response\"\000(\001B\033\n\nsiru.protoB\013SampleProtoP" +
+      "\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
