@@ -13,6 +13,8 @@ import siru.proto.SampleResponse;
 import siru.proto.SampleServiceGrpc;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service
@@ -34,11 +36,13 @@ public class SampleGrpcClient {
     public CompletableFuture<SampleResponse> sampleCall(SampleRequest sampleRequest) {
         CompletableFuture<SampleResponse> completableFuture = new CompletableFuture<>();
 
-        asyncStub.sampleCall(sampleRequest, new StreamObserver<SampleResponse>() {
+        asyncStub.sampleCall(sampleRequest, new StreamObserver<>() {
+
+            private SampleResponse response;
             @Override
             public void onNext(SampleResponse response) {
                 log.debug("Response {}", response.getMessage());
-                completableFuture.complete(response);
+                this.response = response;
             }
 
             @Override
@@ -49,6 +53,7 @@ public class SampleGrpcClient {
             @Override
             public void onCompleted() {
                 log.debug("GrpcClient#sampleCall - onCompleted");
+                completableFuture.complete(response);
             }
         });
 
@@ -75,7 +80,10 @@ public class SampleGrpcClient {
             }
         });
 
-        sampleRequestIterable.forEach(requestStreamObserver::onNext);
+        CompletableFuture.runAsync(() -> {
+            sampleRequestIterable.forEach(requestStreamObserver::onNext);
+            requestStreamObserver.onCompleted();
+        });
 
         return completableFuture;
     }
@@ -103,7 +111,7 @@ public class SampleGrpcClient {
 
             @Override
             public void subscribe(Subscriber<? super SampleResponse> s) {
-                log.info("subscribe");
+                log.debug("subscribe");
                 this.subscriber = s;
                 s.onSubscribe(new BaseSubscriber<>() {});
                 StreamObserver<SampleRequest> requestStreamObserver = asyncStub.clientStreamingCall(this);
