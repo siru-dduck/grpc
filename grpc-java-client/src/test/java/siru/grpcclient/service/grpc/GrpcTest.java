@@ -10,6 +10,7 @@ import net.devh.boot.grpc.server.autoconfigure.GrpcServerAutoConfiguration;
 import net.devh.boot.grpc.server.autoconfigure.GrpcServerFactoryAutoConfiguration;
 import net.devh.boot.grpc.server.service.GrpcService;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,11 +26,9 @@ import siru.proto.SampleServiceGrpc;
 
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -43,6 +42,7 @@ public class GrpcTest {
     private SampleGrpcClient sampleGrpcClient;
 
     @Test
+    @Description("gprc unary 요청 정상 테스트")
     void sampleCallTest() {
         // given
         SampleRequest sampleRequest = SampleRequest.newBuilder()
@@ -59,6 +59,7 @@ public class GrpcTest {
 
     @Test
     @Description("gprc unary 요청 여러건 보낸후 요청-응답 처리시간 테스트")
+    @Timeout(value = 2000, unit = TimeUnit.MILLISECONDS)
     void many_sampleCallTest() throws InterruptedException {
         // given
         final int NUM_REQUEST = 50000;
@@ -72,25 +73,57 @@ public class GrpcTest {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start("performance test");
         IntStream.range(0, NUM_REQUEST)
-                .forEach(i -> {
-                    sampleGrpcClient
-                            .sampleCall(sampleRequest)
-                            .thenAccept(response -> {
-                                log.debug("{}", response);
-                                latch.countDown();
-                                if (latch.getCount() <= 0) {
-                                    stopWatch.stop();
-                                    log.info("{}", stopWatch.prettyPrint());
-                                }
-                            });
-                });
+                .forEach(i -> sampleGrpcClient
+                        .sampleCall(sampleRequest)
+                        .thenAccept(response -> {
+                            log.debug("{}", response);
+                            latch.countDown();
+                            if (latch.getCount() <= 0) {
+                                stopWatch.stop();
+                                log.info("{}", stopWatch.prettyPrint());
+                            }
+                        })
+                );
 
         // then
         assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
-        assertThat(stopWatch.getLastTaskInfo().getTimeMillis()).isLessThan(Duration.ofMillis(2000).toMillis());
     }
 
     @Test
+    @Description("reactive unary call 여러건 테스트")
+    @Timeout(value = 2000, unit = TimeUnit.MILLISECONDS)
+    void many_reactive_sampleCallTest_test() throws InterruptedException {
+        // given
+        final int NUM_REQUEST = 50000;
+        final CountDownLatch latch = new CountDownLatch(NUM_REQUEST);
+        SampleRequest sampleRequest = SampleRequest.newBuilder()
+                .setUserId("U-1234")
+                .setMessage("hello")
+                .build();
+
+        // when
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start("performance test");
+        IntStream.range(0, NUM_REQUEST)
+                .forEach(i ->
+                        sampleGrpcClient.sampleCallWithReactiveStream(sampleRequest)
+                                .doOnSuccess(r -> {
+                                    latch.countDown();
+                                    if(latch.getCount() <= 0) {
+                                        stopWatch.stop();
+                                        log.info("{}", stopWatch.prettyPrint());
+                                    }
+                                })
+                                .subscribe()
+                );
+
+        // then
+        assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
+    }
+
+    @Test
+    @Description("many gprc client streaming call test")
+    @Timeout(value = 2000, unit = TimeUnit.MILLISECONDS)
     void many_clientStreamingCall_test() throws InterruptedException {
         // given
         final int NUM_REQUEST = 100000;
@@ -118,11 +151,12 @@ public class GrpcTest {
                     });
         });
 
-        assertThat(latch.await(10, TimeUnit.SECONDS)).isTrue();
-        assertThat(stopWatch.getLastTaskInfo().getTimeMillis()).isLessThan(Duration.ofMillis(2000).toMillis());
+        assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
     }
 
     @Test
+    @Description("many gprc client streaming with reactive stream call test")
+    @Timeout(value = 2000, unit = TimeUnit.MILLISECONDS)
     void many_reactive_clientStreamingCall_test() throws InterruptedException {
         // given
         final int NUM_REQUEST = 100000;
@@ -151,7 +185,6 @@ public class GrpcTest {
         });
 
         assertThat(latch.await(2, TimeUnit.SECONDS)).isTrue();
-        assertThat(stopWatch.getLastTaskInfo().getTimeMillis()).isLessThan(Duration.ofMillis(2000).toMillis());
     }
 
     @Configuration
@@ -183,6 +216,9 @@ public class GrpcTest {
         }
     }
 
+    /**
+     * Mock Server
+     */
     @GrpcService
     public static class SampleService extends SampleServiceGrpc.SampleServiceImplBase {
 

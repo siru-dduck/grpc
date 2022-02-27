@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
+import org.reactivestreams.Subscription;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.BaseSubscriber;
 import reactor.core.publisher.Mono;
@@ -58,6 +59,42 @@ public class SampleGrpcClient {
         });
 
         return completableFuture;
+    }
+
+    public Mono<SampleResponse> sampleCallWithReactiveStream(SampleRequest sampleRequest) {
+        class StreamObserverPublisher implements Publisher<SampleResponse>, StreamObserver<SampleResponse> {
+
+            private Subscriber<? super SampleResponse> subscriber;
+
+            @Override
+            public void onNext(SampleResponse value) {
+                subscriber.onNext(value);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                log.error("", t);
+            }
+
+            @Override
+            public void onCompleted() {
+                log.debug("onCompleted");
+                subscriber.onComplete();
+            }
+
+            @Override
+            public void subscribe(Subscriber<? super SampleResponse> s) {
+                log.debug("subscribe");
+                this.subscriber = s;
+//                s.onSubscribe(new BaseSubscriber<>() {});
+                s.onSubscribe(new BaseSubscriber<>() {});
+            }
+        }
+        StreamObserverPublisher streamObserverPublisher = new StreamObserverPublisher();
+        asyncStub.sampleCall(sampleRequest, streamObserverPublisher);
+        Mono<SampleResponse> responseMono = Mono.from(streamObserverPublisher);
+
+        return responseMono;
     }
 
     public CompletableFuture<SampleResponse> clientStreamingCall(Iterable<SampleRequest> sampleRequestIterable) {
